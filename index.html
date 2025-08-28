@@ -72,9 +72,6 @@
             .input-section {
                 display: none;
             }
-            .footer {
-                display: none;
-            }
             .worksheet {
                 border: none;
             }
@@ -188,9 +185,18 @@
                 margin: 5px;
                 margin-bottom: 10px;
             }
+        }    
+        .footer{
+            text-align: center; 
+            margin-top: 40px; 
+            font-size: 0.9em; 
+            color: #666;
         }
         @media print {
             .input-section {
+                display: none;
+            }
+            .footer{
                 display: none;
             }
             .worksheet {
@@ -218,7 +224,7 @@
         <div class="write-line"></div>
     </div>
 
-    <div id="footer" style="text-align: center; margin-top: 40px; font-size: 0.9em; color: #666;">
+    <div class="footer">
         <div>Created with ❤️</div>
         <div>forever 320</div>
     </div>
