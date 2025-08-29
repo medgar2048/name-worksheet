@@ -1,13 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>   
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Name Tracing Worksheet Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway+Dots&display=swap" rel="stylesheet">
+    
     <style>
+        @font-face {
+            font-family: 'KGPrimaryPenmanship';
+            src: url('KGPrimaryPenmanship.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'KGPrimaryDots';
+            src: url('KGPrimaryDots.ttf') format('truetype');
+        }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'KGPrimaryPenmanship', Arial, sans-serif;
+            max-width: 1056px;
             margin: 0px auto;
             padding: 0 20px 20px 20px;
         }
@@ -18,7 +25,7 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
         }
         /* Only style h1 inside input section */
         div.input-section > h1 {
@@ -29,6 +36,7 @@
         }
         /* Only style input inside input section */
         div.input-section > input {
+            font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
             font-size: 1.2em;
             padding: 12px 20px;
             border: 2px solid #e2e8f0;
@@ -44,6 +52,7 @@
         }
         /* Only style buttons inside input section */
         div.input-section > button {
+            font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
             background: #4299e1;
             color: white;
             border: none;
@@ -79,15 +88,19 @@
                 margin: 0;
                 padding: 0;
             }
+            @page {
+                size: landscape;
+                margin: 0.5in;
+            }
         }
         .name-line {
             font-size: 64px;
-            margin: 140px 0;
+            margin: 70px 0;
             letter-spacing: 4px;
             position: relative;
             height: 48px;
             display: flex;
-            align-items: center;
+            /* align-items: center; */
             justify-content: flex-start;
         }
         .read-line {
@@ -95,11 +108,11 @@
             margin-top: 10px;
         }
         .trace-line {
-            color: #dddddd;
-            -webkit-text-stroke: 0.5px #666;
+            color: #fff43b;
+            /* -webkit-text-stroke: 0.5px #d8ff31; */
         }
         .dots-line {
-            font-family: 'Raleway Dots', cursive;
+            font-family: 'KGPrimaryDots', system-ui, sans-serif;
             color: #666;
         }
         .write-line {
@@ -141,10 +154,10 @@
         }
         /* Three lines for each group */
         .name-line::before {
-            top: 0;
+            top: 12px;
         }
         .name-line::after {
-            top: 16px;
+            top: 29px;
         }
         .name-line,
         .write-line {
@@ -152,10 +165,10 @@
             padding-top: 2px;
         }
         .write-line::before {
-            top: 0;
+            top: 12px;
         }
         .write-line::after {
-            top: 16px;
+            top: 29px;
         }
         button {
             padding: 10px 20px;
