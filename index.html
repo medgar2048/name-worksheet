@@ -27,6 +27,22 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
         }
+        
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .input-group {
+            margin: 8px 0;
+            min-width: 200px;
+            max-width: 300px;
+        }
         /* Only style h1 inside input section */
         div.input-section > h1 {
             color: #2d3748;
@@ -60,8 +76,8 @@
             transition: border-color 0.2s ease;
             cursor: pointer;
         }
-        /* Only style buttons inside input section */
-        div.input-section > button {
+        /* Button styling */
+        div.input-section button {
             font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
             background: #4299e1;
             color: white;
@@ -74,11 +90,11 @@
             margin: 5px;
             font-weight: 500;
         }
-        div.input-section > button:hover {
+        div.input-section button:hover {
             background: #3182ce;
             transform: translateY(-1px);
         }
-        div.input-section > button:active {
+        div.input-section button:active {
             transform: translateY(1px);
         }
         /* Keep worksheet styles simple */
@@ -162,6 +178,7 @@
             display: flex;
             /* align-items: center; */
             justify-content: flex-start;
+            overflow: hidden;
         }
         
         /* Line images styling */
@@ -393,9 +410,19 @@
                 margin-bottom: 15px;
                 font-size: 1.8em;
             }
-            div.input-section > button {
+            div.input-section button {
                 width: calc(50% - 10px);
                 margin: 5px;
+            }
+            .flex-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px; /* Reduce gap in mobile view */
+            }
+            .input-group {
+                width: 100%;
+                max-width: none;
+                margin: 5px 0; /* Reduce margin in mobile view */
             }
             div.input-section > input {
                 width: calc(100% - 44px);
@@ -405,7 +432,10 @@
             div.input-section select {
                 width: 100%;
                 max-width: 200px;
-                margin: 5px;
+                margin: 3px 0;
+            }
+            .input-group label {
+                margin-bottom: 2px;
             }
         }    
         .footer{
@@ -444,58 +474,63 @@
             </label>
         </div>
         
-        <div id="singleNameInput" style="margin-bottom: 15px;">
+        <div id="singleNameInput" style="margin-bottom: 15px; width: 100%;">
             <input type="text" id="nameInput" placeholder="Enter child's name" style="font-size: 18px; padding: 5px; width: 100%; max-width: 300px;">
         </div>
         
-        <div id="multipleNameInput" style="display: none; margin-bottom: 15px;">
+        <div id="multipleNameInput" style="display: none; margin-bottom: 15px; width: 100%;">
             <textarea id="nameListInput" placeholder="Enter names (one per line)" style="font-size: 18px; padding: 5px; width: 100%; max-width: 300px; height: 100px; font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;"></textarea>
         </div>
         
-        <div style="margin: 15px 0;">
-            <label for="writeLineCount" style="margin-right: 10px;">Number of write lines:</label>
-            <select id="writeLineCount" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+        <div class="flex-container">
+            <div class="input-group">
+                <label for="writeLineCount" style="display: block; margin-bottom: 5px;">Number of write lines:</label>
+                <select id="writeLineCount" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="fontSize" style="display: block; margin-bottom: 5px;">Font size:</label>
+                <select id="fontSize" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                    <option value="xl" selected>Extra Large</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="lineImage" style="display: block; margin-bottom: 5px;">Line image:</label>
+                <select id="lineImage" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                    <option value="none">None</option>
+                    <option value="apple">Apple</option>
+                    <option value="butterfly">Butterfly</option>
+                    <option value="dinosour">Dinosaur</option>
+                    <option value="duck">Duck</option>
+                    <option value="elephant">Elephant</option>
+                    <option value="fish">Fish</option>
+                    <option value="frog">Frog</option>
+                    <option value="ladybug">Ladybug</option>
+                    <option value="owl">Owl</option>
+                    <option value="pig">Pig</option>
+                    <option value="rocket">Rocket</option>
+                    <option value="sheep">Sheep</option>
+                    <option value="sun">Sun</option>
+                    <option value="teddybear">Teddy Bear</option>
+                    <option value="whale">Whale</option>
+                </select>
+            </div>
         </div>
         
-        <div style="margin: 15px 0;">
-            <label for="fontSize" style="margin-right: 10px;">Font size:</label>
-            <select id="fontSize" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-                <option value="xl" selected>Extra Large</option>
-            </select>
+        <div style="margin-top: 20px;" class="button-container">
+            <button onclick="generateWorksheet()">Generate</button>
+            <button onclick="handlePrint()">Print</button>
         </div>
-
-        <div style="margin: 15px 0;">
-            <label for="lineImage" style="margin-right: 10px;">Line image:</label>
-            <select id="lineImage" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
-                <option value="none">None</option>
-                <option value="apple">Apple</option>
-                <option value="butterfly">Butterfly</option>
-                <option value="dinosour">Dinosaur</option>
-                <option value="duck">Duck</option>
-                <option value="elephant">Elephant</option>
-                <option value="fish">Fish</option>
-                <option value="frog">Frog</option>
-                <option value="ladybug">Ladybug</option>
-                <option value="owl">Owl</option>
-                <option value="pig">Pig</option>
-                <option value="rocket">Rocket</option>
-                <option value="sheep">Sheep</option>
-                <option value="sun">Sun</option>
-                <option value="teddybear">Teddy Bear</option>
-                <option value="whale">Whale</option>
-            </select>
-        </div>
-        <button onclick="generateWorksheet()">Generate</button>
-        <button onclick="handlePrint()">Print</button>
     </div>
     
     <div id="worksheets-container" class="font-size-medium">
