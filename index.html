@@ -86,6 +86,18 @@
             border: 1px solid #ccc;
             padding: 20px;
             margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media print {
+            .worksheet {
+                page-break-after: always;
+                margin-bottom: 0;
+            }
+            
+            .worksheet:last-child {
+                page-break-after: avoid;
+            }
         }
         @media print {
             .input-section {
@@ -239,7 +251,24 @@
 <body>
     <div class="input-section">
         <h1>Name Tracer</h1>
-        <input type="text" id="nameInput" placeholder="Enter child's name" style="font-size: 18px; padding: 5px;">
+        
+        <div class="mode-toggle" style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="nameMode" value="single" checked onclick="toggleNameInputMode('single')"> Single Name
+            </label>
+            <label style="margin-left: 15px;">
+                <input type="radio" name="nameMode" value="multiple" onclick="toggleNameInputMode('multiple')"> Multiple Names
+            </label>
+        </div>
+        
+        <div id="singleNameInput" style="margin-bottom: 15px;">
+            <input type="text" id="nameInput" placeholder="Enter child's name" style="font-size: 18px; padding: 5px; width: 100%; max-width: 300px;">
+        </div>
+        
+        <div id="multipleNameInput" style="display: none; margin-bottom: 15px;">
+            <textarea id="nameListInput" placeholder="Enter names (one per line)" style="font-size: 18px; padding: 5px; width: 100%; max-width: 300px; height: 100px; font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;"></textarea>
+        </div>
+        
         <div style="margin: 15px 0;">
             <label for="writeLineCount" style="margin-right: 10px;">Number of write lines:</label>
             <select id="writeLineCount" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
@@ -254,12 +283,14 @@
         <button onclick="handlePrint()">Print</button>
     </div>
     
-    <div id="worksheet" class="worksheet">
-        <div class="name-line read-line"></div>
-        <div class="name-line trace-line"></div>
-        <div class="name-line dots-line"></div>
-        <div id="writeLines">
-            <div class="write-line"></div>
+    <div id="worksheets-container">
+        <div id="worksheet" class="worksheet">
+            <div class="name-line read-line"></div>
+            <div class="name-line trace-line"></div>
+            <div class="name-line dots-line"></div>
+            <div id="writeLines">
+                <div class="write-line"></div>
+            </div>
         </div>
     </div>
 
@@ -270,33 +301,141 @@
 
     <script>
 
-        var shouldAlert  = true;
+        var shouldAlert = true;
+        var currentMode = 'single';
+
+        function toggleNameInputMode(mode) {
+            currentMode = mode;
+            if (mode === 'single') {
+                document.getElementById('singleNameInput').style.display = 'block';
+                document.getElementById('multipleNameInput').style.display = 'none';
+                
+                // Clear multiple worksheets and revert to single worksheet view
+                const worksheetsContainer = document.getElementById('worksheets-container');
+                worksheetsContainer.innerHTML = `
+                    <div id="worksheet" class="worksheet">
+                        <div class="name-line read-line"></div>
+                        <div class="name-line trace-line"></div>
+                        <div class="name-line dots-line"></div>
+                        <div id="writeLines">
+                            <div class="write-line"></div>
+                        </div>
+                    </div>
+                `;
+                
+                // Update the current worksheet with single name input
+                updateWorksheetRealtime();
+            } else {
+                document.getElementById('singleNameInput').style.display = 'none';
+                document.getElementById('multipleNameInput').style.display = 'block';
+                
+                // If there's text in the textarea, generate multiple worksheets
+                const namesList = document.getElementById('nameListInput').value;
+                if (namesList.trim()) {
+                    generateMultipleWorksheets();
+                }
+            }
+        }
 
         function generateWorksheet() {
-            const name = document.getElementById('nameInput').value;
-            if (!name) {
-                alert('Please enter a name');
-                return;
+            if (currentMode === 'single') {
+                const name = document.getElementById('nameInput').value;
+                if (!name) {
+                    alert('Please enter a name');
+                    return;
+                }
+                
+                // Use the real-time update function for consistency
+                updateWorksheetRealtime();
+            } else {
+                const namesList = document.getElementById('nameListInput').value;
+                if (!namesList.trim()) {
+                    alert('Please enter at least one name');
+                    return;
+                }
+                
+                generateMultipleWorksheets();
             }
-
-            // Use the real-time update function for consistency
-            updateWorksheetRealtime();
+        }
+        
+        function generateMultipleWorksheets() {
+            const namesList = document.getElementById('nameListInput').value;
+            if (!namesList.trim()) return;
+            
+            const names = namesList.split('\n').filter(name => name.trim());
+            if (names.length === 0) return;
+            
+            const worksheetsContainer = document.getElementById('worksheets-container');
+            worksheetsContainer.innerHTML = '';
+            
+            const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
+            
+            names.forEach((name, index) => {
+                if (!name.trim()) return;
+                
+                // Create a new worksheet for each name
+                const worksheet = document.createElement('div');
+                worksheet.className = 'worksheet';
+                worksheet.innerHTML = `
+                    <div class="name-line read-line">${name}</div>
+                    <div class="name-line trace-line">${name}</div>
+                    <div class="name-line dots-line">${name}</div>
+                    <div class="write-lines-container"></div>
+                `;
+                
+                // Add the write lines
+                const writeLinesContainer = worksheet.querySelector('.write-lines-container');
+                for (let i = 0; i < writeLineCount; i++) {
+                    const writeLine = document.createElement('div');
+                    writeLine.className = 'write-line';
+                    writeLinesContainer.appendChild(writeLine);
+                }
+                
+                worksheetsContainer.appendChild(worksheet);
+            });
         }
 
         function handlePrint() {
+            if (currentMode === 'single') {
+                const name = document.getElementById('nameInput').value;
+                if (!name) {
+                    alert('Please enter a name before printing');
+                    return;
+                }
+            } else {
+                const namesList = document.getElementById('nameListInput').value.trim();
+                if (!namesList) {
+                    alert('Please enter at least one name before printing');
+                    return;
+                }
+                
+                // Make sure all worksheets are generated
+                generateMultipleWorksheets();
+            }
+            
             if (shouldAlert) {
                 alert('Before you print, please remember to uncheck the "Headers and footers" option in your browser\'s print settings.');
                 shouldAlert = false;
             }
+            
             window.print();
         }
 
-        // Update worksheet as user types in the input box
+        // Update worksheet as user types in the single name input box
         document.getElementById('nameInput').addEventListener('input', function() {
-            updateWorksheetRealtime();
+            if (currentMode === 'single') {
+                updateWorksheetRealtime();
+            }
         });
         
-        // Generate worksheet on Enter key press
+        // Update worksheets when text changes in the multiple names textarea
+        document.getElementById('nameListInput').addEventListener('input', function() {
+            if (currentMode === 'multiple') {
+                generateMultipleWorksheets();
+            }
+        });
+        
+        // Generate worksheet on Enter key press in single name mode
         document.getElementById('nameInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 generateWorksheet();
@@ -305,8 +444,11 @@
         
         // Generate worksheet when write line count changes
         document.getElementById('writeLineCount').addEventListener('change', function() {
-            // Always update the worksheet in real-time
-            updateWorksheetRealtime();
+            if (currentMode === 'single') {
+                updateWorksheetRealtime();
+            } else {
+                generateMultipleWorksheets();
+            }
         });
         
         // Initialize with the correct number of write lines when the page loads
@@ -314,12 +456,15 @@
             updateWorksheetRealtime();
         });
         
-        // Function to update the worksheet in real-time as the user types
+        // Function to update the single worksheet in real-time as the user types
         function updateWorksheetRealtime() {
+            // Only update if in single mode and the worksheet exists
+            if (!document.getElementById('worksheet')) return;
+            
             const name = document.getElementById('nameInput').value;
             
             // Update the name lines, even if name is empty
-            const lines = document.querySelectorAll('.name-line');
+            const lines = document.querySelectorAll('#worksheet .name-line');
             lines.forEach(line => {
                 line.textContent = name;
             });
@@ -328,10 +473,13 @@
             updateWriteLines();
         }
         
-        // Function to update only the writing lines without requiring a name
+        // Function to update only the writing lines without requiring a name (for single worksheet mode)
         function updateWriteLines() {
-            const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
+            // Only proceed if the writeLines element exists (single mode)
             const writeLinesContainer = document.getElementById('writeLines');
+            if (!writeLinesContainer) return;
+            
+            const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
             
             // Clear existing write lines
             writeLinesContainer.innerHTML = '';
