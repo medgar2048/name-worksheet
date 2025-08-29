@@ -279,14 +279,8 @@
                 return;
             }
 
-            // Set the name on the name lines
-            const lines = document.querySelectorAll('.name-line');
-            lines.forEach(line => {
-                line.textContent = name;
-            });
-            
-            // Update the write lines
-            updateWriteLines();
+            // Use the real-time update function for consistency
+            updateWorksheetRealtime();
         }
 
         function handlePrint() {
@@ -297,6 +291,11 @@
             window.print();
         }
 
+        // Update worksheet as user types in the input box
+        document.getElementById('nameInput').addEventListener('input', function() {
+            updateWorksheetRealtime();
+        });
+        
         // Generate worksheet on Enter key press
         document.getElementById('nameInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -306,19 +305,28 @@
         
         // Generate worksheet when write line count changes
         document.getElementById('writeLineCount').addEventListener('change', function() {
-            // Always update the number of writing lines
-            updateWriteLines();
-            
-            // If a name has been entered, regenerate the full worksheet
-            if (document.getElementById('nameInput').value) {
-                generateWorksheet();
-            }
+            // Always update the worksheet in real-time
+            updateWorksheetRealtime();
         });
         
         // Initialize with the correct number of write lines when the page loads
         document.addEventListener('DOMContentLoaded', function() {
-            updateWriteLines();
+            updateWorksheetRealtime();
         });
+        
+        // Function to update the worksheet in real-time as the user types
+        function updateWorksheetRealtime() {
+            const name = document.getElementById('nameInput').value;
+            
+            // Update the name lines, even if name is empty
+            const lines = document.querySelectorAll('.name-line');
+            lines.forEach(line => {
+                line.textContent = name;
+            });
+            
+            // Make sure the write lines are updated
+            updateWriteLines();
+        }
         
         // Function to update only the writing lines without requiring a name
         function updateWriteLines() {
