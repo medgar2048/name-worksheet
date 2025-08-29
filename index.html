@@ -14,12 +14,39 @@
         }
         body {
             font-family: 'KGPrimaryPenmanship', Arial, sans-serif;
-            max-width: 1056px;
+            max-width: 800px;
             margin: 0px auto;
             padding: 0 20px 20px 20px;
         }
         .input-section {
-            margin-bottom: 30px;
+             // Function to update the worksheet in real-time as the user types
+        function updateWorksheetRealtime() {
+            // Only update if in single mode and the worksheet exists
+            if (!document.getElementById('worksheet')) return;
+            
+            const name = document.getElementById('nameInput').value;
+            
+            // Update the name lines, even if name is empty
+            const lines = document.querySelectorAll('#worksheet .name-line');
+            lines.forEach(line => {
+                // Save the existing image if any
+                const existingImage = line.querySelector('.line-image');
+                
+                // Clear the line content but preserve any images
+                line.textContent = name;
+                
+                // Re-add the image if it existed
+                if (existingImage) {
+                    line.insertBefore(existingImage.cloneNode(true), line.firstChild);
+                }
+            });
+            
+            // Make sure the write lines are updated
+            updateWriteLines();
+            
+            // Update line images
+            updateLineImages();
+        }ttom: 30px;
             text-align: center;
             padding: 0 30px 30px 30px;
             background: white;
@@ -110,24 +137,140 @@
                 margin: 0;
                 padding: 0;
             }
-            @page {
-                size: landscape;
+            @page {                
                 margin: 0.5in;
             }
         }
-        .name-line {
+        /* Font size classes */
+        .font-size-small .name-line {
+            font-size: 48px;
+            height: 37px;
+            margin: 50px 0;
+        }
+        
+        .font-size-medium .name-line {
             font-size: 64px;
+            height: 50px;
             margin: 70px 0;
+        }
+        
+        .font-size-large .name-line {
+            font-size: 80px;
+            height: 62px;  /* 80px * 0.78 = 62.4px ≈ 62px */
+            margin: 90px 0;
+        }
+        
+        .font-size-xl .name-line {
+            font-size: 120px;
+            height: 94px;  /* 120px * 0.78 = 93.6px ≈ 94px */
+            margin: 110px 0;
+        }
+        
+        /* Half top margin for first lines in each worksheet */
+        .font-size-small .worksheet .read-line {
+            margin-top: 25px; /* Half of 50px */
+        }
+        
+        .font-size-medium .worksheet .read-line {
+            margin-top: 35px; /* Half of 70px */
+        }
+        
+        .font-size-large .worksheet .read-line {
+            margin-top: 45px; /* Half of 90px */
+        }
+        
+        .font-size-xl .worksheet .read-line {
+            margin-top: 55px; /* Half of 110px */
+        }
+        
+        .name-line {
             letter-spacing: 4px;
             position: relative;
-            height: 48px;
             display: flex;
             /* align-items: center; */
             justify-content: flex-start;
         }
+        
+        /* Line images styling */
+        .line-image {
+            position: absolute;
+            left: 0;
+            object-fit: contain;
+            margin-right: 5px;
+            margin-top: 6px;
+        }
+        
+        /* Size-specific image and padding styling */
+        .font-size-small.has-image .name-line,
+        .font-size-small.has-image .write-line {
+            padding-left: 45px; /* Space for small image */
+        }
+        
+        .font-size-small.has-image .name-line::before,
+        .font-size-small.has-image .name-line::after,
+        .font-size-small.has-image .write-line::before,
+        .font-size-small.has-image .write-line::after {
+            left: 35px; /* Lines start after small image */
+        }
+        
+        .font-size-small .line-image {
+            height: 35px;
+            max-width: 40px;
+        }
+        
+        .font-size-medium.has-image .name-line,
+        .font-size-medium.has-image .write-line {
+            padding-left: 60px; /* Space for medium image */
+        }
+        
+        .font-size-medium.has-image .name-line::before,
+        .font-size-medium.has-image .name-line::after,
+        .font-size-medium.has-image .write-line::before,
+        .font-size-medium.has-image .write-line::after {
+            left: 48px; /* Lines start after medium image */
+        }
+        
+        .font-size-medium .line-image {
+            height: 48px;
+            max-width: 55px;
+        }
+        
+        .font-size-large.has-image .name-line,
+        .font-size-large.has-image .write-line {
+            padding-left: 75px; /* Space for large image */
+        }
+        
+        .font-size-large.has-image .name-line::before,
+        .font-size-large.has-image .name-line::after,
+        .font-size-large.has-image .write-line::before,
+        .font-size-large.has-image .write-line::after {
+            left: 60px; /* Lines start after large image */
+        }
+        
+        .font-size-large .line-image {
+            height: 60px;
+            max-width: 70px;
+        }
+        
+        .font-size-xl.has-image .name-line,
+        .font-size-xl.has-image .write-line {
+            padding-left: 105px; /* Space for extra large image */
+        }
+        
+        .font-size-xl.has-image .name-line::before,
+        .font-size-xl.has-image .name-line::after,
+        .font-size-xl.has-image .write-line::before,
+        .font-size-xl.has-image .write-line::after {
+            left: 90px; /* Lines start after extra large image */
+        }
+        
+        .font-size-xl .line-image {
+            height: 90px;
+            max-width: 95px;
+        }
         .read-line {
             color: black;
-            margin-top: 10px;
+            /* margin-top now controlled by font-size specific rules */
         }
         .trace-line {
             color: #fff43b;
@@ -137,8 +280,29 @@
             font-family: 'KGPrimaryDots', system-ui, sans-serif;
             color: #666;
         }
+        .font-size-small .write-line {
+            height: 37px;
+            margin: 50px 0;
+        }
+        
+        .font-size-medium .write-line {
+            height: 50px;
+            margin: 70px 0;
+        }
+        
+        .font-size-large .write-line {
+            height: 62px;  /* 80px * 0.78 = 62.4px ≈ 62px */
+            margin: 90px 0;
+        }
+        
+        .font-size-xl .write-line {
+            height: 94px;  /* 120px * 0.78 = 93.6px ≈ 94px */
+            margin: 110px 0;
+        }
+        
+        /* We'll adjust top margin of write lines only if needed in the future */
+        
         .write-line {
-            height: 48px;
             position: relative;
         }
         .name-line::before {
@@ -173,23 +337,66 @@
             border-bottom: 2px dashed #666;
             z-index: -100;
         }
-        /* Three lines for each group */
-        .name-line::before {
+        /* Three lines for each group - Small Size */
+        .font-size-small .name-line::before {
+            top: 9px;
+        }
+        .font-size-small .name-line::after {
+            top: 22px;
+        }
+        .font-size-small .write-line::before {
+            top: 9px;
+        }
+        .font-size-small .write-line::after {
+            top: 22px;
+        }
+        
+        /* Three lines for each group - Medium Size */
+        .font-size-medium .name-line::before {
             top: 12px;
         }
-        .name-line::after {
+        .font-size-medium .name-line::after {
             top: 29px;
         }
+        .font-size-medium .write-line::before {
+            top: 12px;
+        }
+        .font-size-medium .write-line::after {
+            top: 29px;
+        }
+        
+        /* Three lines for each group - Large Size */
+        .font-size-large .name-line::before {
+            top: 15px;
+        }
+        .font-size-large .name-line::after {
+            top: 36px;
+        }
+        .font-size-large .write-line::before {
+            top: 15px;
+        }
+        .font-size-large .write-line::after {
+            top: 36px;
+        }
+        
+        /* Three lines for each group - Extra Large Size */
+        .font-size-xl .name-line::before {
+            top: 22px;
+        }
+        .font-size-xl .name-line::after {
+            top: 54px;
+        }
+        .font-size-xl .write-line::before {
+            top: 22px;
+        }
+        .font-size-xl .write-line::after {
+            top: 54px;
+        }
+        
         .name-line,
         .write-line {
             border-bottom: 2px solid #666;
             padding-top: 2px;
-        }
-        .write-line::before {
-            top: 12px;
-        }
-        .write-line::after {
-            top: 29px;
         }
         button {
             padding: 10px 20px;
@@ -279,11 +486,37 @@
                 <option value="5">5</option>
             </select>
         </div>
+        
+        <div style="margin: 15px 0;">
+            <label for="fontSize" style="margin-right: 10px;">Font size:</label>
+            <select id="fontSize" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+                <option value="xl">Extra Large</option>
+            </select>
+        </div>
+
+        <div style="margin: 15px 0;">
+            <label for="lineImage" style="margin-right: 10px;">Line image:</label>
+            <select id="lineImage" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <option value="none">None</option>
+                <option value="apple">Apple</option>
+                <option value="dinosour">Dinosaur</option>
+                <option value="elephant">Elephant</option>
+                <option value="fish">Fish</option>
+                <option value="ladybug">Ladybug</option>
+                <option value="pig">Pig</option>
+                <option value="sun">Sun</option>
+                <option value="teddybear">Teddy Bear</option>
+                <option value="whale">Whale</option>
+            </select>
+        </div>
         <button onclick="generateWorksheet()">Generate</button>
         <button onclick="handlePrint()">Print</button>
     </div>
     
-    <div id="worksheets-container">
+    <div id="worksheets-container" class="font-size-medium">
         <div id="worksheet" class="worksheet">
             <div class="name-line read-line"></div>
             <div class="name-line trace-line"></div>
@@ -310,8 +543,10 @@
                 document.getElementById('singleNameInput').style.display = 'block';
                 document.getElementById('multipleNameInput').style.display = 'none';
                 
-                // Clear multiple worksheets and revert to single worksheet view
+                // Save the current font size class
                 const worksheetsContainer = document.getElementById('worksheets-container');
+                
+                // Clear multiple worksheets and revert to single worksheet view
                 worksheetsContainer.innerHTML = `
                     <div id="worksheet" class="worksheet">
                         <div class="name-line read-line"></div>
@@ -323,6 +558,9 @@
                     </div>
                 `;
                 
+                // Make sure the font size is applied
+                updateFontSize();
+                
                 // Update the current worksheet with single name input
                 updateWorksheetRealtime();
             } else {
@@ -333,6 +571,9 @@
                 const namesList = document.getElementById('nameListInput').value;
                 if (namesList.trim()) {
                     generateMultipleWorksheets();
+                } else {
+                    // Make sure the font size is applied even if no worksheets are generated
+                    updateFontSize();
                 }
             }
         }
@@ -366,7 +607,15 @@
             if (names.length === 0) return;
             
             const worksheetsContainer = document.getElementById('worksheets-container');
+            
+            // Save the current font size class before clearing the container
+            const currentFontSizeClass = Array.from(worksheetsContainer.classList)
+                .find(cls => cls.startsWith('font-size-')) || 'font-size-medium';
+            
             worksheetsContainer.innerHTML = '';
+            
+            // Re-apply the font size class
+            updateFontSize();
             
             const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
             
@@ -393,6 +642,9 @@
                 
                 worksheetsContainer.appendChild(worksheet);
             });
+            
+            // Add line images to all worksheets
+            updateLineImages();
         }
 
         function handlePrint() {
@@ -451,10 +703,72 @@
             }
         });
         
+        // Update font size when selection changes
+        document.getElementById('fontSize').addEventListener('change', function() {
+            updateFontSize();
+            if (currentMode === 'single') {
+                updateWorksheetRealtime();
+            } else {
+                generateMultipleWorksheets();
+            }
+        });
+        
+        // Update line image when selection changes
+        document.getElementById('lineImage').addEventListener('change', function() {
+            if (currentMode === 'single') {
+                updateWorksheetRealtime();
+            } else {
+                generateMultipleWorksheets();
+            }
+        });
+        
         // Initialize with the correct number of write lines when the page loads
         document.addEventListener('DOMContentLoaded', function() {
+            updateFontSize();
             updateWorksheetRealtime();
+            // Line images are already handled in updateWorksheetRealtime
         });
+        
+        // Function to update the font size class
+        function updateFontSize() {
+            const fontSize = document.getElementById('fontSize').value;
+            const worksheetsContainer = document.getElementById('worksheets-container');
+            
+            // Remove existing font size classes
+            worksheetsContainer.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xl');
+            
+            // Add the selected font size class
+            worksheetsContainer.classList.add('font-size-' + fontSize);
+        }
+        
+        // Function to update line images
+        function updateLineImages() {
+            const imageChoice = document.getElementById('lineImage').value;
+            const worksheetsContainer = document.getElementById('worksheets-container');
+            
+            // Remove all existing images
+            const existingImages = document.querySelectorAll('.line-image');
+            existingImages.forEach(img => img.remove());
+            
+            // Remove has-image class if no image is selected
+            if (imageChoice === 'none') {
+                worksheetsContainer.classList.remove('has-image');
+                return;
+            }
+            
+            // Add has-image class to container
+            worksheetsContainer.classList.add('has-image');
+            
+            // Add images to all name-lines and write-lines
+            const allLines = document.querySelectorAll('.name-line, .write-line');
+            allLines.forEach(line => {
+                const img = document.createElement('img');
+                img.src = `images/${imageChoice}.png`;
+                img.alt = imageChoice;
+                img.className = 'line-image';
+                line.insertBefore(img, line.firstChild);
+            });
+        }
         
         // Function to update the single worksheet in real-time as the user types
         function updateWorksheetRealtime() {
@@ -466,11 +780,23 @@
             // Update the name lines, even if name is empty
             const lines = document.querySelectorAll('#worksheet .name-line');
             lines.forEach(line => {
+                // Save the existing image if any
+                const existingImage = line.querySelector('.line-image');
+                
+                // Clear the line content but preserve any images
                 line.textContent = name;
+                
+                // Re-add the image if it existed
+                if (existingImage) {
+                    line.insertBefore(existingImage.cloneNode(true), line.firstChild);
+                }
             });
             
             // Make sure the write lines are updated
             updateWriteLines();
+            
+            // Update line images
+            updateLineImages();
         }
         
         // Function to update only the writing lines without requiring a name (for single worksheet mode)
@@ -480,6 +806,8 @@
             if (!writeLinesContainer) return;
             
             const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
+            const imageChoice = document.getElementById('lineImage').value;
+            const addImage = imageChoice !== 'none';
             
             // Clear existing write lines
             writeLinesContainer.innerHTML = '';
@@ -488,6 +816,16 @@
             for (let i = 0; i < writeLineCount; i++) {
                 const writeLine = document.createElement('div');
                 writeLine.className = 'write-line';
+                
+                // Add image if selected
+                if (addImage) {
+                    const img = document.createElement('img');
+                    img.src = `images/${imageChoice}.png`;
+                    img.alt = imageChoice;
+                    img.className = 'line-image';
+                    writeLine.appendChild(img);
+                }
+                
                 writeLinesContainer.appendChild(writeLine);
             }
         }
