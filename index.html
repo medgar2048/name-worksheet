@@ -19,34 +19,7 @@
             padding: 0 20px 20px 20px;
         }
         .input-section {
-             // Function to update the worksheet in real-time as the user types
-        function updateWorksheetRealtime() {
-            // Only update if in single mode and the worksheet exists
-            if (!document.getElementById('worksheet')) return;
-            
-            const name = document.getElementById('nameInput').value;
-            
-            // Update the name lines, even if name is empty
-            const lines = document.querySelectorAll('#worksheet .name-line');
-            lines.forEach(line => {
-                // Save the existing image if any
-                const existingImage = line.querySelector('.line-image');
-                
-                // Clear the line content but preserve any images
-                line.textContent = name;
-                
-                // Re-add the image if it existed
-                if (existingImage) {
-                    line.insertBefore(existingImage.cloneNode(true), line.firstChild);
-                }
-            });
-            
-            // Make sure the write lines are updated
-            updateWriteLines();
-            
-            // Update line images
-            updateLineImages();
-        }ttom: 30px;
+            bottom: 30px;
             text-align: center;
             padding: 0 30px 30px 30px;
             background: white;
@@ -197,7 +170,6 @@
             left: 0;
             object-fit: contain;
             margin-right: 5px;
-            margin-top: 6px;
         }
         
         /* Size-specific image and padding styling */
@@ -216,6 +188,7 @@
         .font-size-small .line-image {
             height: 35px;
             max-width: 40px;
+            margin-top: 4px;
         }
         
         .font-size-medium.has-image .name-line,
@@ -233,6 +206,7 @@
         .font-size-medium .line-image {
             height: 48px;
             max-width: 55px;
+            margin-top: 6px;
         }
         
         .font-size-large.has-image .name-line,
@@ -250,6 +224,7 @@
         .font-size-large .line-image {
             height: 60px;
             max-width: 70px;
+            margin-top: 9px;
         }
         
         .font-size-xl.has-image .name-line,
@@ -267,6 +242,7 @@
         .font-size-xl .line-image {
             height: 90px;
             max-width: 95px;
+            margin-top: 12px;
         }
         .read-line {
             color: black;
@@ -491,9 +467,9 @@
             <label for="fontSize" style="margin-right: 10px;">Font size:</label>
             <select id="fontSize" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
                 <option value="small">Small</option>
-                <option value="medium" selected>Medium</option>
+                <option value="medium">Medium</option>
                 <option value="large">Large</option>
-                <option value="xl">Extra Large</option>
+                <option value="xl" selected>Extra Large</option>
             </select>
         </div>
 
@@ -502,11 +478,17 @@
             <select id="lineImage" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
                 <option value="none">None</option>
                 <option value="apple">Apple</option>
+                <option value="butterfly">Butterfly</option>
                 <option value="dinosour">Dinosaur</option>
+                <option value="duck">Duck</option>
                 <option value="elephant">Elephant</option>
                 <option value="fish">Fish</option>
+                <option value="frog">Frog</option>
                 <option value="ladybug">Ladybug</option>
+                <option value="owl">Owl</option>
                 <option value="pig">Pig</option>
+                <option value="rocket">Rocket</option>
+                <option value="sheep">Sheep</option>
                 <option value="sun">Sun</option>
                 <option value="teddybear">Teddy Bear</option>
                 <option value="whale">Whale</option>
