@@ -45,10 +45,20 @@
             margin-right: 10px;
             transition: border-color 0.2s ease;
         }
-        div.input-section > input:focus {
+        div.input-section > input:focus,
+        div.input-section select:focus {
             outline: none;
             border-color: #4299e1;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        div.input-section select {
+            font-family: 'KGPrimaryPenmanship', system-ui, sans-serif;
+            font-size: 1.2em;
+            padding: 8px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: border-color 0.2s ease;
+            cursor: pointer;
         }
         /* Only style buttons inside input section */
         div.input-section > button {
@@ -118,7 +128,6 @@
         .write-line {
             height: 48px;
             position: relative;
-            margin: 70px 0;
         }
         .name-line::before {
             content: '';
@@ -198,6 +207,11 @@
                 margin: 5px;
                 margin-bottom: 10px;
             }
+            div.input-section select {
+                width: 100%;
+                max-width: 200px;
+                margin: 5px;
+            }
         }    
         .footer{
             text-align: center; 
@@ -226,6 +240,16 @@
     <div class="input-section">
         <h1>Name Tracer</h1>
         <input type="text" id="nameInput" placeholder="Enter child's name" style="font-size: 18px; padding: 5px;">
+        <div style="margin: 15px 0;">
+            <label for="writeLineCount" style="margin-right: 10px;">Number of write lines:</label>
+            <select id="writeLineCount" style="font-family: 'KGPrimaryPenmanship', system-ui, sans-serif; padding: 5px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
         <button onclick="generateWorksheet()">Generate</button>
         <button onclick="handlePrint()">Print</button>
     </div>
@@ -234,7 +258,9 @@
         <div class="name-line read-line"></div>
         <div class="name-line trace-line"></div>
         <div class="name-line dots-line"></div>
-        <div class="write-line"></div>
+        <div id="writeLines">
+            <div class="write-line"></div>
+        </div>
     </div>
 
     <div class="footer">
@@ -253,10 +279,14 @@
                 return;
             }
 
+            // Set the name on the name lines
             const lines = document.querySelectorAll('.name-line');
             lines.forEach(line => {
                 line.textContent = name;
             });
+            
+            // Update the write lines
+            updateWriteLines();
         }
 
         function handlePrint() {
@@ -273,6 +303,38 @@
                 generateWorksheet();
             }
         });
+        
+        // Generate worksheet when write line count changes
+        document.getElementById('writeLineCount').addEventListener('change', function() {
+            // Always update the number of writing lines
+            updateWriteLines();
+            
+            // If a name has been entered, regenerate the full worksheet
+            if (document.getElementById('nameInput').value) {
+                generateWorksheet();
+            }
+        });
+        
+        // Initialize with the correct number of write lines when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWriteLines();
+        });
+        
+        // Function to update only the writing lines without requiring a name
+        function updateWriteLines() {
+            const writeLineCount = parseInt(document.getElementById('writeLineCount').value);
+            const writeLinesContainer = document.getElementById('writeLines');
+            
+            // Clear existing write lines
+            writeLinesContainer.innerHTML = '';
+            
+            // Create the selected number of write lines
+            for (let i = 0; i < writeLineCount; i++) {
+                const writeLine = document.createElement('div');
+                writeLine.className = 'write-line';
+                writeLinesContainer.appendChild(writeLine);
+            }
+        }
     </script>
 </body>
 </html>
