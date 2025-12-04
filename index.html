@@ -173,7 +173,7 @@
         }
         
         .name-line {
-            letter-spacing: 4px;
+            /* letter-spacing: 4px; */
             position: relative;
             display: flex;
             /* align-items: center; */
@@ -272,6 +272,19 @@
             font-family: 'KGPrimaryDots', system-ui, sans-serif;
             color: #666;
         }
+        .dots-line .font-size-small{
+            letter-spacing: 2px;
+        }
+        .dots-line .font-size-medium{
+            letter-spacing: 1.24px;
+        }
+        .dots-line .font-size-large{
+            letter-spacing: .45px;
+        }
+        .dots-line .font-size-xl{
+            letter-spacing: -1.2px;
+        }
+
         .font-size-small .write-line {
             height: 37px;
             margin: 50px 0;
@@ -443,6 +456,97 @@
             font-size: 0.9em; 
             color: #666;
         }
+
+        /* Name tag styles */
+        .tag-container {
+            display: grid;
+            /* allow columns to shrink but avoid content overflow with minmax(0,1fr) */
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            justify-items: center;
+            align-items: start;
+            padding: 10px 0 30px 0;
+            width: 100%;
+        }
+
+        /* When tags mode is active hide the controls under the name inputs */
+        body.tags-mode .flex-container {
+            display: none !important;
+        }
+
+        .name-tag {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 22px;
+                /* Maintain 3.5" x 2.25" aspect ratio but scale to column width (aspect-ratio keeps proportions).
+                    Use max-width so we don't grow larger than the full-size image if the container allows it. */
+                width: 100%;
+                aspect-ratio: 1050 / 675; /* 3.5in / 2.25in */
+                /* ensure the tag fits its grid cell and doesn't overflow neighbors */
+                max-width: 100%;
+                min-width: 0;
+                overflow: hidden;
+                box-sizing: border-box;
+                justify-self: stretch;
+                border-radius: 12px;
+            border-radius: 12px;
+            color: #111;
+            background-repeat: no-repeat;
+            background-position: center center;
+            /* Fill the whole tag area with the background image */
+            background-size: cover;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        .name-tag img.tag-bg {
+            position: absolute;
+            left: 0; top: 0; right: 0; bottom: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* SVG arc text styling: white fill with black outline and proper paint order */
+        .arc-text, .arc-text textPath {
+            fill: #ffffff; /* white fill */
+            stroke: #000000; /* black outline */
+            stroke-width: 12px;
+            paint-order: stroke fill;
+            -webkit-text-stroke: 12px black; /* fallback for webkit */
+            font-weight: 700; /* bold */
+            stroke-linejoin: round;
+        }
+
+        .fix-stroke { paint-order: stroke fill; }
+
+        /* Ensure tags don't get split across printed pages and that each prints at the column size */
+        @media print {
+            .tag-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.15in; /* small gutter in inches */
+            }
+            .name-tag {
+                /* On print use real inches for gap and avoid extra scaling beyond page width */
+                page-break-inside: avoid;
+                break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .name-tag img.tag-bg {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Removed the overlay so the tag background remains unchanged */
         @media print {
             .input-section {
                 display: none;
@@ -464,12 +568,22 @@
     <div class="input-section">
         <h1>Name Tracer</h1>
         
-        <div class="mode-toggle" style="margin-bottom: 15px;">
-            <label>
-                <input type="radio" name="nameMode" value="single" checked onclick="toggleNameInputMode('single')"> Single Name
+        <div class="mode-toggle" style="margin-bottom: 8px;">
+            <strong>Mode:</strong>
+            <label style="margin-left: 10px;">
+                <input type="radio" name="workMode" value="trace" checked onclick="toggleWorkMode('trace')"> Name Trace
             </label>
             <label style="margin-left: 15px;">
-                <input type="radio" name="nameMode" value="multiple" onclick="toggleNameInputMode('multiple')"> Multiple Names
+                <input type="radio" name="workMode" value="tags" onclick="toggleWorkMode('tags')"> Name Tags
+            </label>
+        </div>
+
+        <div class="input-type-toggle" style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="inputType" value="single" checked onclick="toggleInputMode('single')"> Single Name
+            </label>
+            <label style="margin-left: 15px;">
+                <input type="radio" name="inputType" value="multiple" onclick="toggleInputMode('multiple')"> Multiple Names
             </label>
         </div>
         
@@ -552,68 +666,84 @@
 
     <script>
 
-        var shouldAlert = true;
-        var currentMode = 'single';
+    var shouldAlert = true;
+    var workMode = 'trace'; // 'trace' or 'tags'
+    var inputMode = 'single'; // 'single' or 'multiple'
 
-        function toggleNameInputMode(mode) {
-            currentMode = mode;
+        function toggleInputMode(mode) {
+            inputMode = mode;
             if (mode === 'single') {
                 document.getElementById('singleNameInput').style.display = 'block';
                 document.getElementById('multipleNameInput').style.display = 'none';
-                
-                // Save the current font size class
-                const worksheetsContainer = document.getElementById('worksheets-container');
-                
-                // Clear multiple worksheets and revert to single worksheet view
-                worksheetsContainer.innerHTML = `
-                    <div id="worksheet" class="worksheet">
-                        <div class="name-line read-line"></div>
-                        <div class="name-line trace-line"></div>
-                        <div class="name-line dots-line"></div>
-                        <div id="writeLines">
-                            <div class="write-line"></div>
-                        </div>
-                    </div>
-                `;
-                
-                // Make sure the font size is applied
-                updateFontSize();
-                
-                // Update the current worksheet with single name input
-                updateWorksheetRealtime();
+                // If in trace mode, update the worksheet; if in tags mode, generate tags
+                if (workMode === 'trace') updateWorksheetRealtime();
+                else generateNameTags();
             } else {
                 document.getElementById('singleNameInput').style.display = 'none';
                 document.getElementById('multipleNameInput').style.display = 'block';
-                
-                // If there's text in the textarea, generate multiple worksheets
-                const namesList = document.getElementById('nameListInput').value;
-                if (namesList.trim()) {
-                    generateMultipleWorksheets();
-                } else {
-                    // Make sure the font size is applied even if no worksheets are generated
-                    updateFontSize();
-                }
+                if (workMode === 'trace') generateMultipleWorksheets();
+                else generateNameTags();
             }
         }
 
-        function generateWorksheet() {
-            if (currentMode === 'single') {
-                const name = document.getElementById('nameInput').value;
-                if (!name) {
-                    alert('Please enter a name');
-                    return;
+        function toggleWorkMode(mode) {
+            workMode = mode;
+            const flex = document.querySelector('.flex-container');
+            // hide the three combo boxes when in tags mode
+            if (mode === 'tags') {
+                if (flex) flex.style.display = 'none';
+                document.body.classList.add('tags-mode');
+                // show only the input area that matches the inputMode
+                if (inputMode === 'single') {
+                    document.getElementById('singleNameInput').style.display = 'block';
+                    document.getElementById('multipleNameInput').style.display = 'none';
+                } else {
+                    document.getElementById('singleNameInput').style.display = 'none';
+                    document.getElementById('multipleNameInput').style.display = 'block';
                 }
-                
-                // Use the real-time update function for consistency
-                updateWorksheetRealtime();
+                generateNameTags();
             } else {
+                if (flex) flex.style.display = '';
+                document.body.classList.remove('tags-mode');
+                // restore visibility according to inputMode and regenerate
+                if (inputMode === 'single') {
+                    document.getElementById('singleNameInput').style.display = 'block';
+                    document.getElementById('multipleNameInput').style.display = 'none';
+                    updateWorksheetRealtime();
+                } else {
+                    document.getElementById('singleNameInput').style.display = 'none';
+                    document.getElementById('multipleNameInput').style.display = 'block';
+                    generateMultipleWorksheets();
+                }
+            }
+        }
+        
+        function generateWorksheet() {
+            if (workMode === 'trace') {
+                if (inputMode === 'single') {
+                    const name = document.getElementById('nameInput').value;
+                    if (!name) {
+                        alert('Please enter a name');
+                        return;
+                    }
+                    // Use the real-time update function for consistency
+                    updateWorksheetRealtime();
+                } else {
+                    const namesList = document.getElementById('nameListInput').value;
+                    if (!namesList.trim()) {
+                        alert('Please enter at least one name');
+                        return;
+                    }
+                    generateMultipleWorksheets();
+                }
+            } else if (workMode === 'tags') {
                 const namesList = document.getElementById('nameListInput').value;
-                if (!namesList.trim()) {
+                const singleName = document.getElementById('nameInput').value;
+                if (!namesList.trim() && !singleName.trim()) {
                     alert('Please enter at least one name');
                     return;
                 }
-                
-                generateMultipleWorksheets();
+                generateNameTags();
             }
         }
         
@@ -666,21 +796,31 @@
         }
 
         function handlePrint() {
-            if (currentMode === 'single') {
-                const name = document.getElementById('nameInput').value;
-                if (!name) {
-                    alert('Please enter a name before printing');
-                    return;
+            if (workMode === 'trace') {
+                if (inputMode === 'single') {
+                    const name = document.getElementById('nameInput').value;
+                    if (!name) {
+                        alert('Please enter a name before printing');
+                        return;
+                    }
+                } else {
+                    const namesList = document.getElementById('nameListInput').value.trim();
+                    if (!namesList) {
+                        alert('Please enter at least one name before printing');
+                        return;
+                    }
+                    // Make sure all worksheets are generated
+                    generateMultipleWorksheets();
                 }
-            } else {
+            } else if (workMode === 'tags') {
                 const namesList = document.getElementById('nameListInput').value.trim();
-                if (!namesList) {
+                const singleName = document.getElementById('nameInput').value.trim();
+                if (!namesList && !singleName) {
                     alert('Please enter at least one name before printing');
                     return;
                 }
-                
-                // Make sure all worksheets are generated
-                generateMultipleWorksheets();
+                // Generate the tags so print preview has content
+                generateNameTags();
             }
             
             if (shouldAlert) {
@@ -693,15 +833,19 @@
 
         // Update worksheet as user types in the single name input box
         document.getElementById('nameInput').addEventListener('input', function() {
-            if (currentMode === 'single') {
+            if (workMode === 'trace' && inputMode === 'single') {
                 updateWorksheetRealtime();
+            } else if (workMode === 'tags') {
+                generateNameTags();
             }
         });
         
         // Update worksheets when text changes in the multiple names textarea
         document.getElementById('nameListInput').addEventListener('input', function() {
-            if (currentMode === 'multiple') {
+            if (workMode === 'trace' && inputMode === 'multiple') {
                 generateMultipleWorksheets();
+            } else if (workMode === 'tags') {
+                generateNameTags();
             }
         });
         
@@ -714,37 +858,43 @@
         
         // Generate worksheet when write line count changes
         document.getElementById('writeLineCount').addEventListener('change', function() {
-            if (currentMode === 'single') {
-                updateWorksheetRealtime();
-            } else {
-                generateMultipleWorksheets();
+            if (workMode === 'trace') {
+                if (inputMode === 'single') updateWorksheetRealtime();
+                else generateMultipleWorksheets();
             }
         });
         
         // Update font size when selection changes
         document.getElementById('fontSize').addEventListener('change', function() {
             updateFontSize();
-            if (currentMode === 'single') {
-                updateWorksheetRealtime();
-            } else {
-                generateMultipleWorksheets();
+            if (workMode === 'trace') {
+                if (inputMode === 'single') updateWorksheetRealtime();
+                else generateMultipleWorksheets();
+            } else if (workMode === 'tags') {
+                generateNameTags();
             }
         });
         
         // Update line image when selection changes
         document.getElementById('lineImage').addEventListener('change', function() {
-            if (currentMode === 'single') {
-                updateWorksheetRealtime();
-            } else {
-                generateMultipleWorksheets();
+            if (workMode === 'trace') {
+                if (inputMode === 'single') updateWorksheetRealtime();
+                else generateMultipleWorksheets();
+            } else if (workMode === 'tags') {
+                generateNameTags();
             }
         });
         
         // Initialize with the correct number of write lines when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             updateFontSize();
-            updateWorksheetRealtime();
-            // Line images are already handled in updateWorksheetRealtime
+            if (workMode === 'trace') {
+                if (inputMode === 'single') updateWorksheetRealtime();
+                else generateMultipleWorksheets();
+            } else {
+                generateNameTags();
+            }
+            // Line images are already handled in updateWorksheetRealtime / other generators
         });
         
         // Function to update the font size class
@@ -846,6 +996,113 @@
                 
                 writeLinesContainer.appendChild(writeLine);
             }
+        }
+
+        // Helper: list of available border images (use existing images)
+        // The new cloud.svg in the project root will be used as the default background for tags.
+        const tagDefaultImage = 'cloud.svg';
+        const _tagBorderImages = [
+            'apple.png','butterfly.png','dinosour.png','duck.png','elephant.png','fish.png','frog.png','ladybug.png','lion.png','owl.png','pig.png','rocket.png','sheep.png','sun.png','teddybear.png','tiger.png','whale.png'
+        ];
+
+        function getRandomBorderImage() {
+            const idx = Math.floor(Math.random() * _tagBorderImages.length);
+            return _tagBorderImages[idx];
+        }
+
+        // Generate a simple visual name tag or tags from single/multiple input
+        function generateNameTags() {
+            const single = document.getElementById('nameInput').value.trim();
+            const multiRaw = document.getElementById('nameListInput').value || '';
+            const multi = multiRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+            let names = [];
+            if (multi.length) names = multi;
+            else if (single) names = [single];
+
+            const worksheetsContainer = document.getElementById('worksheets-container');
+
+            // Keep current font size class
+            const fontClass = Array.from(worksheetsContainer.classList).find(c => c.startsWith('font-size-')) || 'font-size-medium';
+            worksheetsContainer.innerHTML = '';
+            worksheetsContainer.classList.add(fontClass);
+
+            if (names.length === 0) return;
+
+            const container = document.createElement('div');
+            container.className = 'tag-container';
+
+            names.forEach((name, idx) => {
+                const tag = document.createElement('div');
+                tag.className = 'name-tag';
+
+                // use the default cloud SVG if available; fall back to a random image from images/
+                const img = tagDefaultImage || getRandomBorderImage();
+                const url = img === tagDefaultImage ? `${img}` : `images/${img}`;
+                // Insert an actual img element (not CSS background) so browsers will print it as an image
+                const bg = document.createElement('img');
+                bg.className = 'tag-bg';
+                bg.src = url;
+                bg.alt = '';
+                tag.appendChild(bg);
+
+                // Create an SVG that places the name on a slight arc using a unique path id
+                const svgns = 'http://www.w3.org/2000/svg';
+                const svg = document.createElementNS(svgns, 'svg');
+                svg.setAttribute('viewBox', '0 0 1000 675');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                // position SVG absolutely so it overlays the tag area without affecting layout
+                svg.style.position = 'absolute';
+                svg.style.left = '0';
+                svg.style.top = '0';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.zIndex = '2';
+
+                const pathId = `tagPath-${Date.now()}-${idx}-${Math.floor(Math.random()*10000)}`;
+
+                const defs = document.createElementNS(svgns, 'defs');
+                const path = document.createElementNS(svgns, 'path');
+                // slight arc: start near left, arc upward then to the right
+                // coordinates chosen inside the 1000x675 viewBox
+                path.setAttribute('id', pathId);
+                // shallower arc: reduce the y-radius so the curve is less pronounced
+                path.setAttribute('d', 'M 50 430 A 450 60 0 0 1 950 430');
+                defs.appendChild(path);
+                svg.appendChild(defs);
+
+                const textEl = document.createElementNS(svgns, 'text');
+                // ensure text renders above the background; apply arc-text/fix-stroke classes
+                textEl.setAttribute('class', 'arc-text fix-stroke');
+                textEl.setAttribute('font-family', "'Comic Sans MS', 'Comic Sans', cursive");
+                // scale font down a bit from previous (192) to 140 for better fit
+                textEl.setAttribute('font-size', '140');
+                textEl.setAttribute('font-weight', '700');
+                textEl.setAttribute('text-anchor', 'middle');
+                // also set SVG stroke/fill attributes to ensure outline+fill
+                textEl.setAttribute('fill', '#ffffff');
+                textEl.setAttribute('stroke', '#000000');
+                textEl.setAttribute('stroke-width', '12');
+
+                const textPath = document.createElementNS(svgns, 'textPath');
+                textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${pathId}`);
+                textPath.setAttribute('startOffset', '50%');
+                textPath.setAttribute('dominant-baseline', 'middle');
+                // small vertical adjustment so text sits nicely on the arc
+                // small vertical adjustment so text sits nicely on the arc (scaled down)
+                textPath.setAttribute('dy', '-12');
+                textPath.textContent = name;
+
+                textEl.appendChild(textPath);
+                svg.appendChild(textEl);
+
+                // Clear any default text and append svg
+                tag.appendChild(svg);
+                container.appendChild(tag);
+            });
+
+            worksheetsContainer.appendChild(container);
         }
     </script>
 </body>
